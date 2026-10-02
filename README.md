@@ -3,17 +3,17 @@
 Minimal full-stack starter: a FastAPI backend and a Vite + React + TypeScript frontend, deployable to Vercel as a single project.
 
 ```
-backend/main.py     FastAPI app (API under /api, serves frontend/dist in production)
+backend/main.py     FastAPI app (API under /api; serves frontend/dist when run locally after a build)
 backend/requirements.txt  Python dependencies
 frontend/           Vite + React + TypeScript
-pyproject.toml      Project metadata + Vercel entrypoint
-vercel.json         Builds the frontend during deployment
+pyproject.toml      Project metadata
+vercel.json         Vercel services (backend + frontend) and routing
 ```
 
 ## How it works
 
 - **In development** you run two servers: FastAPI on port `8000` and the Vite dev server on port `5173`. Vite forwards every `/api/*` request to FastAPI (see `frontend/vite.config.ts`), so the browser only talks to `localhost:5173` and no CORS setup is needed.
-- **In production** the frontend is built into `frontend/dist`, and FastAPI serves it with `app.frontend()`. On Vercel the whole project becomes one deployment: the API runs as a Vercel Function and the static files are served from Vercel's CDN.
+- **In production** the frontend is built into `frontend/dist`. On Vercel the project deploys as two services on one domain: `backend` (a Vercel Function handling `/api/*`) and `frontend` (static files served from Vercel's CDN).
 
 ## Prerequisites
 
@@ -93,7 +93,7 @@ Your prompt should now start with `(.venv)`. Install the dependencies:
 pip install -r requirements.txt
 ```
 
-> When you add a Python package, add it to `backend/requirements.txt` (and keep the `dependencies` list in `pyproject.toml` in sync, since Vercel reads it).
+> When you add a Python package, add it to `backend/requirements.txt` (Vercel installs from it) and keep the `dependencies` list in `pyproject.toml` in sync.
 
 ### 3. Start the backend
 
@@ -136,7 +136,7 @@ Edits to files in `frontend/src` reload in the browser instantly, and edits to `
 
 ### 6. (Optional) Test the production build locally
 
-This runs the app the way Vercel does: one FastAPI server serving both the API and the built frontend.
+This runs one FastAPI server serving both the API and the built frontend.
 
 Stop both dev servers (`Ctrl+C`). From the `frontend` folder, build the frontend:
 
@@ -154,15 +154,24 @@ Open http://localhost:8000. The React app and the API are now both served from p
 
 > `frontend/dist` is ignored by git. Vercel builds it itself during deployment.
 
+To run the Vercel services setup locally instead, install the Vercel CLI and start it from the project root (`-L` runs it without logging in to Vercel):
+
+```bash
+npm install -g vercel
+```
+
+```bash
+vercel dev -L
+```
+
 ---
 
 ## Deploy to Vercel
 
-You don't need to change any settings. Vercel:
+You don't need to change any settings. `vercel.json` defines two [services](https://vercel.com/docs/services):
 
-1. Detects FastAPI from `pyproject.toml` (`[tool.vercel] entrypoint = "backend.main:app"`).
-2. Runs `buildCommand` from `vercel.json` to build the frontend into `frontend/dist`.
-3. Deploys FastAPI as a Vercel Function and serves `frontend/dist` from its CDN.
+1. `backend` (`backend/`, FastAPI `main:app`) runs as a Vercel Function and receives every `/api/*` request.
+2. `frontend` (`frontend/`, Vite) is built into `frontend/dist` and serves every other path from Vercel's CDN.
 
 There are two ways to deploy. Pick one.
 
@@ -191,7 +200,7 @@ git push origin master
 1. Go to https://vercel.com/new.
 2. Under **Import Git Repository**, find your repository and click **Import**. (If it isn't listed, click **Adjust GitHub App Permissions** and give Vercel access to the repository.)
 3. Keep the defaults:
-   - **Framework Preset:** FastAPI (detected automatically)
+   - **Framework Preset:** leave as detected (services come from `vercel.json`)
    - **Root Directory:** `./`
 4. Click **Deploy**.
 

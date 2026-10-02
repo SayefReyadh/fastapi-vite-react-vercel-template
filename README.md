@@ -4,8 +4,9 @@ Minimal full-stack starter: a FastAPI backend and a Vite + React + TypeScript fr
 
 ```
 backend/main.py     FastAPI app (API under /api, serves frontend/dist in production)
+backend/requirements.txt  Python dependencies
 frontend/           Vite + React + TypeScript
-pyproject.toml      Python dependencies + Vercel entrypoint
+pyproject.toml      Project metadata + Vercel entrypoint
 vercel.json         Builds the frontend during deployment
 ```
 
@@ -45,16 +46,22 @@ git --version
 ### 1. Get the code
 
 ```bash
-git clone https://github.com/SayefReyadh/full-stack-fastapi-template.git
+git clone https://github.com/SayefReyadh/fastapi-vite-react-vercel-template.git
 ```
 
 ```bash
-cd full-stack-fastapi-template
+cd fastapi-vite-react-vercel-template
 ```
 
 ### 2. Set up the backend
 
-Create a virtual environment (run this from the project root):
+Go to the backend folder:
+
+```bash
+cd backend
+```
+
+Create a virtual environment:
 
 ```bash
 python -m venv .venv
@@ -83,13 +90,17 @@ source .venv/bin/activate
 Your prompt should now start with `(.venv)`. Install the dependencies:
 
 ```bash
-pip install "fastapi[standard]"
+pip install -r requirements.txt
 ```
+
+> When you add a Python package, add it to `backend/requirements.txt` (and keep the `dependencies` list in `pyproject.toml` in sync, since Vercel reads it).
 
 ### 3. Start the backend
 
+From the `backend` folder:
+
 ```bash
-fastapi dev backend/main.py
+fastapi dev main.py
 ```
 
 Leave this terminal running. Check that it works:
@@ -133,16 +144,10 @@ Stop both dev servers (`Ctrl+C`). From the `frontend` folder, build the frontend
 npm run build
 ```
 
-Go back to the project root:
+In the backend terminal (in `backend/`, with the virtual environment active), start FastAPI in production mode:
 
 ```bash
-cd ..
-```
-
-Start FastAPI in production mode (with the virtual environment active):
-
-```bash
-fastapi run backend/main.py
+fastapi run main.py
 ```
 
 Open http://localhost:8000. The React app and the API are now both served from port 8000.
@@ -239,7 +244,7 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 **Port already in use.** Run the backend on another port:
 
 ```bash
-fastapi dev backend/main.py --port 8001
+fastapi dev main.py --port 8001
 ```
 
 If you change the port, update the proxy target in `frontend/vite.config.ts` to match.

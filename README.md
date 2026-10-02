@@ -46,6 +46,16 @@ vercel dev -L
 
 > Add new Python packages to `backend/requirements.txt`.
 
+## Class exercise
+
+Send an ID, name and email from React to FastAPI and show the reply.
+
+1. In `backend/main.py`, uncomment the `EXERCISE (part 1)` block. Try `POST /api/user` at http://localhost:8000/docs.
+2. In `frontend/src/App.tsx`, uncomment `<UserForm />` and the `UserForm` function (`EXERCISE (part 2)`).
+3. Fill in the form at http://localhost:5173 and click **Send**.
+
+Try an invalid email (send it from `/docs`, since the browser blocks it in the form): FastAPI returns `422` without any extra code.
+
 ## Deploy to Vercel
 
 1. Push the repo to GitHub.

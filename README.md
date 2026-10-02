@@ -1,261 +1,62 @@
 # FastAPI + React Template
 
-Minimal full-stack starter: a FastAPI backend and a Vite + React + TypeScript frontend, deployable to Vercel as a single project.
+FastAPI backend + Vite/React/TypeScript frontend, deployed to Vercel as one project.
 
 ```
-backend/main.py     FastAPI app (API under /api; serves frontend/dist when run locally after a build)
-backend/requirements.txt  Python dependencies
-frontend/           Vite + React + TypeScript
-pyproject.toml      Project metadata
-vercel.json         Vercel services (backend + frontend) and routing
+backend/    FastAPI app (routes under /api)
+frontend/   Vite + React + TypeScript
+vercel.json Vercel setup: /api/* goes to backend, everything else to frontend
 ```
 
-## How it works
+## Requirements
 
-- **In development** you run two servers: FastAPI on port `8000` and the Vite dev server on port `5173`. Vite forwards every `/api/*` request to FastAPI (see `frontend/vite.config.ts`), so the browser only talks to `localhost:5173` and no CORS setup is needed.
-- **In production** the frontend is built into `frontend/dist`. On Vercel the project deploys as two services on one domain: `backend` (a Vercel Function handling `/api/*`) and `frontend` (static files served from Vercel's CDN).
+- [Python](https://www.python.org/downloads/) 3.10+
+- [Node.js](https://nodejs.org/) 22+
 
-## Prerequisites
-
-Install these first:
-
-- [Python](https://www.python.org/downloads/) 3.10 or newer
-- [Node.js](https://nodejs.org/) 22 LTS or newer (includes `npm`)
-- [Git](https://git-scm.com/downloads)
-
-Check the installed versions:
-
-```bash
-python --version
-```
-
-```bash
-node --version
-```
-
-```bash
-git --version
-```
-
-> On macOS/Linux, use `python3` wherever this guide says `python`.
-
----
+> On macOS/Linux, use `python3` instead of `python`.
 
 ## Run locally
 
-### 1. Get the code
-
-```bash
-git clone https://github.com/SayefReyadh/fastapi-vite-react-vercel-template.git
-```
-
-```bash
-cd fastapi-vite-react-vercel-template
-```
-
-### 2. Set up the backend
-
-Go to the backend folder:
+**Backend** (terminal 1):
 
 ```bash
 cd backend
-```
-
-Create a virtual environment:
-
-```bash
 python -m venv .venv
-```
-
-Activate it. Pick the command for your shell:
-
-Windows (PowerShell):
-
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
-Windows (Command Prompt):
-
-```cmd
-.venv\Scripts\activate.bat
-```
-
-macOS/Linux:
-
-```bash
-source .venv/bin/activate
-```
-
-Your prompt should now start with `(.venv)`. Install the dependencies:
-
-```bash
+.venv\Scripts\Activate.ps1      # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-```
-
-> When you add a Python package, add it to `backend/requirements.txt` (Vercel installs from it) and keep the `dependencies` list in `pyproject.toml` in sync.
-
-### 3. Start the backend
-
-From the `backend` folder:
-
-```bash
 fastapi dev main.py
 ```
 
-Leave this terminal running. Check that it works:
-
-- API: http://localhost:8000/api/hello
-- Interactive API docs: http://localhost:8000/docs
-
-### 4. Set up and start the frontend
-
-Open a **second terminal** in the project root, then go to the frontend folder:
+**Frontend** (terminal 2):
 
 ```bash
 cd frontend
-```
-
-Install the dependencies:
-
-```bash
 npm install
-```
-
-Start the dev server:
-
-```bash
 npm run dev
 ```
 
-### 5. Open the app
+Open http://localhost:5173 and click **Say hello**. Vite forwards `/api` requests to the backend on port 8000.
 
-Go to http://localhost:5173, type a name and click **Say hello**. The message comes from the FastAPI backend.
-
-Edits to files in `frontend/src` reload in the browser instantly, and edits to `backend/main.py` restart the API automatically.
-
-### 6. (Optional) Test the production build locally
-
-This runs one FastAPI server serving both the API and the built frontend.
-
-Stop both dev servers (`Ctrl+C`). From the `frontend` folder, build the frontend:
-
-```bash
-npm run build
-```
-
-In the backend terminal (in `backend/`, with the virtual environment active), start FastAPI in production mode:
-
-```bash
-fastapi run main.py
-```
-
-Open http://localhost:8000. The React app and the API are now both served from port 8000.
-
-> `frontend/dist` is ignored by git. Vercel builds it itself during deployment.
-
-To run the Vercel services setup locally instead, install the Vercel CLI and start it from the project root (`-L` runs it without logging in to Vercel):
+To run it the way Vercel does instead, from the project root:
 
 ```bash
 npm install -g vercel
-```
-
-```bash
 vercel dev -L
 ```
 
----
+> Add new Python packages to `backend/requirements.txt`.
 
 ## Deploy to Vercel
 
-You don't need to change any settings. `vercel.json` defines two [services](https://vercel.com/docs/services):
+1. Push the repo to GitHub.
+2. Go to https://vercel.com/new, import the repo and click **Deploy**. Keep **Root Directory** as `./`.
 
-1. `backend` (`backend/`, FastAPI `main:app`) runs as a Vercel Function and receives every `/api/*` request.
-2. `frontend` (`frontend/`, Vite) is built into `frontend/dist` and serves every other path from Vercel's CDN.
-
-There are two ways to deploy. Pick one.
-
-### Option A: Deploy from GitHub (recommended)
-
-Every push to your main branch deploys automatically.
-
-**1. Push your code to GitHub.** Commit your changes from the project root:
-
-```bash
-git add .
-```
-
-```bash
-git commit -m "Initial commit"
-```
-
-```bash
-git push origin master
-```
-
-**2. Create a Vercel account** at https://vercel.com/signup. Signing up with GitHub is the easiest option.
-
-**3. Import the project:**
-
-1. Go to https://vercel.com/new.
-2. Under **Import Git Repository**, find your repository and click **Import**. (If it isn't listed, click **Adjust GitHub App Permissions** and give Vercel access to the repository.)
-3. Keep the defaults:
-   - **Framework Preset:** leave as detected (services come from `vercel.json`)
-   - **Root Directory:** `./`
-4. Click **Deploy**.
-
-**4. Open your app.** When the build finishes, Vercel shows a URL such as `https://your-project.vercel.app`. Open it and click **Say hello**.
-
-From now on:
-- Pushes to `master` update the production URL.
-- Pushes to other branches and pull requests get their own preview URLs.
-
-### Option B: Deploy with the Vercel CLI
-
-Install the CLI:
-
-```bash
-npm install -g vercel
-```
-
-Log in:
-
-```bash
-vercel login
-```
-
-From the project root, create a preview deployment. The first run asks a few setup questions; the defaults are fine.
-
-```bash
-vercel
-```
-
-When the preview looks right, deploy to production:
-
-```bash
-vercel --prod
-```
-
----
+Every push to `main` redeploys automatically. Or deploy from your machine with `vercel --prod`.
 
 ## Troubleshooting
 
-**PowerShell says "running scripts is disabled on this system" when activating `.venv`.** Allow local scripts for your user account, then run the activate command again:
-
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-```
-
-**`fastapi: command not found` or `'fastapi' is not recognized`.** The virtual environment isn't active. Activate it (step 2) and try again.
-
-**The frontend shows `Request failed: 500`, or the Vite terminal shows proxy errors.** The backend isn't running. Start it in a separate terminal (step 3).
-
-**Port already in use.** Run the backend on another port:
-
-```bash
-fastapi dev main.py --port 8001
-```
-
-If you change the port, update the proxy target in `frontend/vite.config.ts` to match.
-
-**A Vercel build fails.** Open the deployment in the Vercel dashboard and check **Build Logs**. Before redeploying, confirm that `npm run build` works locally inside `frontend/`.
+- **"Running scripts is disabled" in PowerShell:** run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+- **`fastapi` not found:** activate the virtual environment first.
+- **`Request failed: 500` in the app:** the backend isn't running.
+- **App at localhost:8000 shows an old version:** delete `frontend/dist`.
+- **Vercel build fails:** check **Build Logs** in the Vercel dashboard, and make sure `npm run build` works in `frontend/`.
